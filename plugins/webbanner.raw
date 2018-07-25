@@ -1,15 +1,12 @@
-from concurrent.futures import ThreadPoolExecutor
 from bs4 import BeautifulSoup as BS
+from DrMoriaty.utils.log import gprint, rprint, colored
 import requests
-from termcolor import colored
-exe = ThreadPoolExecutor(max_workers=10)
 
-def l(*args):
-    print(colored("[+]",'green'), *args)
-
+mode = "thread"
+thread = 20
 
 def usage():
-    l("get http banner's title")
+    gprint("get http banner's title")
 
 def test_single(url, ssl=False):
     if ssl:
@@ -17,20 +14,18 @@ def test_single(url, ssl=False):
     else:
         u = 'http://' + url
     try:
-        res = requests.get(u)
+        res = requests.get(u, timeout=10)
         if res.status_code == 200:
             t = BS(res.text, 'html.parser')("title")[0].text
             if isinstance(t, bytes):
                 t = t.decode(res.encoding, 'ignore')
-            l(url, t)
+            gprint(u, t)
     except Exception as e:
-        print(colored("[%s] "%url, "green"), colored(e, 'red'))
+        rprint(url, colored(e, 'red'))
 
 def test(targets):
     hosts = []
-    for i in targets:
-        for ii in i.ports.split("/"):
-            hosts.append(i.ip + ":" + ii)
-
-    for host in hosts:
-        exe.submit(test_single, host)
+    for ii in targets.ports.split("/"):
+        hosts.append(targets.ip + ":" + ii)
+    for url in hosts:
+        test_single(url)

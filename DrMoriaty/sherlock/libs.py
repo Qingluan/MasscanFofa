@@ -2,6 +2,9 @@ from DrMoriaty.utils.log import lprint, gprint, rprint, colored, cprint
 from DrMoriaty.datas.data import Cache, Info
 from DrMoriaty.utils.setting import DB_FOFA
 
+from functools import partial
+from concurrent import futures
+from concurrent.futures.thread import ThreadPoolExecutor
 from .test import load,ls_mod
 
 
@@ -44,6 +47,7 @@ def search_in_db(key=None, *show_options):
 
 
 class TestBase:
+    process_now = 0
     ins = []
     def __init__(self, target):
         self.target = target
@@ -53,16 +57,68 @@ class TestBase:
         if self in self.__class__.ins:
             self.__class__.ins.remove(self)
 
+    @staticmethod
+    def process_add(all):
+        TestBase.process_now += 1
+        cprint("     %d / %d "% (TestBase.process_now, all),color="blue", on_color="on_white",end='\r')
 
     @classmethod
     def run(cls, Obj):
+        TestBase.process_now = 0
 
-        hs = [i.target for i in cls.ins]
+        def try_run(*args, **kargs):
+            try:
+                return Obj.test(*args, **kargs)
+            except Exception as e:
+                rprint(e)
+
+        test_if_same = set()
+        hs = []
+        for i in cls.ins:
+            if (i.target.ip + i.target.ports) in test_if_same: continue
+            test_if_same.add(i.target.ip + i.target.ports)
+            hs.append(i.target)
+        #hs = [i.target for i in cls.ins]
+        process_len = len(hs)
         if hasattr(Obj, '__name__'):
             cls.log("use :" , Obj.__name__)
-        res = Obj.test(hs)
-        if res:
-            cls.log(res)
+        if hasattr(Obj, "mode"):
+            if Obj.mode == "thread":
+                thread = 7
+                if hasattr(Obj, 'thread'):
+                    thread = int(Obj.thread)
+                if hasattr(Obj, 'timeout'):
+                    timeout = Obj.timeout
+                else:
+                    timeout = 12
+                gprint("set mode : %s" % Obj.mode)
+                gprint("set thread : %d" % thread)
+                gprint("set timeout : %d" % timeout)
+                with ThreadPoolExecutor(max_workers=thread) as exe:
+                    if not hasattr(Obj, 'callback'):
+                        if hasattr(Obj, 'log') and Obj.log == 'simple':
+
+                            callback = lambda x: gprint(x, "\nfinish done | %s" % colored("-" * 5 + '\n',
+                            'blue'))
+                        else:
+                            callback = lambda x: TestBase.process_add(process_len)
+                    else:
+                        callback = Obj.callback
+
+                    def callback_out(future, url=''):
+                        try:
+                            r = future.result(timeout=timeout)
+                            callback(r)
+                        except futures.TimeoutError:
+                            rprint('timeout:', url)
+
+                    for h in hs:
+                        future = exe.submit(try_run, h)
+                        future.add_done_callback(partial(callback_out, url=h.ip))
+        else:
+            res = try_run(hs)
+            if res:
+                cls.log(res)
 
     @classmethod
     def log(cls,*args, label='green', **kwargs):
@@ -73,7 +129,10 @@ class TestBase:
         print(head, *args, **kwargs)
 
 
-def load_and_run_test(prepare_test_info, *module_names):
+def load_and_run_test(prepare_test_info, *module_names, **test_options):
+    """
+        thread: int (only use for plugin set)
+    """
     if not len(prepare_test_info) > 0:
         rprint("No targets")
         return

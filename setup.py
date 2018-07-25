@@ -24,13 +24,17 @@ class MyInstall(install):
             
             os.mkdir(TEST_MODULES_ROOT)
             os.popen("touch %s" % os.path.join(TEST_MODULES_ROOT, "__init__.py"))
-            os.popen("cp -v {} {} ".format("plugins/alive.raw", os.path.join(TEST_MODULES_ROOT,"alive.py"))).read()            
-            os.popen("cp -v {} {} ".format("plugins/webbanner.raw", os.path.join(TEST_MODULES_ROOT, "banner.py"))).read()
-
+        
+        for file in os.listdir("plugins"):
+            if not file.endswith(".raw"): continue
+            src = os.path.join("plugins", file)
+            des = os.path.join(TEST_MODULES_ROOT, file.rsplit("raw", 1)[0] + "py")
+            os.popen("cp -v {} {} ".format(src, des)).read()            
+        
 
 
 setup(name='x-mroy-1051',
-    version='0.1.1',
+    version='0.1.2',
     description='search in web',
     url='https://github.com//.git',
     author='mroy_qing',
@@ -39,7 +43,7 @@ setup(name='x-mroy-1051',
     include_package_data=True,
     zip_safe=False,
     packages=find_packages(),
-    install_requires=['mroylib-min','FLowWork','termcolor'],
+    install_requires=['mroylib-min','tabulate','FLowWork','termcolor'],
     entry_points={
         'console_scripts': ['x-sehen=DrMoriaty.cmd.main:main',]
     },

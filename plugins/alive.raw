@@ -1,0 +1,25 @@
+from asynctools.servers import TcpTests
+from termcolor import colored
+
+
+def usage():
+    print(colored("[+]", "blue"), " test if target 's ports all alive")
+
+
+def test(targets):
+    hosts = []
+    for i in targets:
+        for ii in i.ports.split("/"):
+            hosts.append(i.ip + ":" + ii)
+    hosts = list(set(hosts))
+    res = TcpTests(hosts)
+    unalive = set(hosts) - set(res) 
+    for i in res:
+        if "443" in i[0]:
+            print(colored("[+]", "green"), "https://" + i[0], " alive")
+        else:
+            print(colored("[+]", "green"), "http://" + i[0], " alive")
+
+    for i in host:
+        if i not in res:
+            print(colored("[-]", "red"), i, " dead")

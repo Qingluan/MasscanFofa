@@ -8,10 +8,20 @@ from DrMoriaty.sherlock.test import load, ls_mod
 
 from DrMoriaty.utils.log import gprint, lprint, rprint
 from DrMoriaty.searcher.fofa_search import Fofa
-
+from DrMoriaty.searcher.github_search import Github
 from DrMoriaty.masscan.masscan import Masscan, MasscanDaemon
 
 proxy= False
+
+def github_search_do(args):
+    gprint("use github waek search")
+    git = Github(proxy=args.proxy)
+    if len(args.search) == 1:
+        gprint("use default")
+        git.weak_search(args.search[0])
+    else:
+        git.search(*args.search)
+
 def masscan_do(args):
     if len(args.search) > 0:
         target = args.search[0]
@@ -57,7 +67,7 @@ def main():
     parser.add_argument('-l', '--list', action='store_true', default=False, help='list local db.')
 
     parser.add_argument('-p', '--page', type=int, default=4, help='set page to search in web')
-    parser.add_argument('-P', '--proxy', action='store_true', default=False, help='set proxy')
+    parser.add_argument('-P', '--proxy', default=None, help='set proxy; socks5://127.0.0.1:1080')
     parser.add_argument('-t', '--test', nargs='*', help='use test module to test result')
     parser.add_argument('--login', action='store_true', default=False, help='login in fofa')
     
@@ -95,6 +105,8 @@ def main():
             prepare_test_info = masscan_do(args)
         elif args.use == "db":
             prepare_test_info = db_do(args)
+        elif args.use == 'github':
+            github_search_do(args)
 
     if args.ls_mod:
         ls_mod()

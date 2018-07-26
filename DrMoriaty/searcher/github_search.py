@@ -8,12 +8,16 @@ from qlib.net import to
 from DrMoriaty.utils.log import Tprint,gprint,rprint, colored
 from DrMoriaty.utils.setting import GITHUB_LOGIN, GITHUB_SESSION
 from concurrent.futures.thread import ThreadPoolExecutor
+from requestium import Session, Keys
 
 class Github:
     def __init__(self, proxy=None):
         self.cookies = None
+        self.sess = Session("/usr/local/phantomjs", "phantomjs", default_timeout=15)
+        if proxy:
+            self.sess.proxies['https'] = proxy
+            self.sess.proxies['http'] = proxy
         self.proxy = proxy
-        
 
     def save_session(self,name, password, cookie):
         gprint("save cred and session")
@@ -29,6 +33,10 @@ class Github:
         if os.path.exists(GITHUB_SESSION):
             with open(GITHUB_SESSION, 'rb') as fp:
                 self.cookies = pickle.load(fp)
+                self.sess.cookies.update(self.cookies)
+                self.sess.get("https://github.com")
+                self.sess.transfer_session_cookies_to_driver()
+
 
         elif os.path.exists(GITHUB_LOGIN):
             with open(GITHUB_LOGIN,'rb') as fp:
@@ -41,36 +49,29 @@ class Github:
 
     def login(self, name=None, password=None):
         
-        r1 = to('https://github.com/login', proxy=self.proxy) 
         soup = BeautifulSoup(r1.text,features='lxml')
         s1 = soup.find(name='input',attrs={'name':'authenticity_token'}).get('value')
         r1_cookies = r1.cookies.get_dict()
 
         gprint("try login github")
-        r2 = to(
-            'https://github.com/session',
-            data ={
-                'commit':'Sign in',
-                'utf8':'✓',
-                'authenticity_token':s1,
-                'login':name,
-                'password':password
-            },
-            method='post',
-            cookies = r1.cookies.get_dict(),
-            proxy=self.proxy
-        )
-        self.cookies = r2.cookies.get_dict()
+        r1 = self.sess.driver.get('https://github.com/login') 
+        self.sess.driver.find_element_by_css_selector("input[name=\"login\"]").send_keys(name)
+        self.sess.driver.find_element_by_css_selector("input[name=\"password\"]").send_keys(password)
+        self.sess.driver.find_element_by_css_selector("input[name=\"commit\"]").click()
+        self.sess.transfer_driver_cookies_to_session()
+        self.cookies = self.sess.cookies.get_dict()
         self.save_session(name, password, self.cookies)
 
     def weak_search(self,key):
         self.load_session()
-        with ThreadPoolExecutor(max_workers=10) as exe:
-
-            for k in ['smtp', 'ssh', 'email']:
-
-                s1 = exe.submit(self.search,key, k)
-                s1.add_done_callback(print)
+        self.search(key,"smtp")
+        self.search(key,"ssh")
+        # with ThreadPoolExecutor(max_workers=10) as exe:
+# 
+            # for k in ['smtp', 'ssh', 'email']:
+# 
+                # s1 = exe.submit(self.search,key, k)
+                # s1.add_done_callback(print)
             
             
 
@@ -79,8 +80,9 @@ class Github:
         if not self.cookies:
             self.load_session()
         url = "https://github.com/search?q={}&type=code".format("+".join(key))
-        res = to(url, cookies = self.cookies)
-        b = BeautifulSoup(res.text, 'lxml')
+        self.sess.driver.get(url)
+        res = self.sess.driver.page_source
+        b = BeautifulSoup(res, 'lxml')
 
         codes = b.select(".code-list-item")
         if len(codes) > 0:

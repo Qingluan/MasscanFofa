@@ -1,4 +1,4 @@
-from DrMoriaty.utils.log import lprint, gprint, rprint, colored, cprint
+from DrMoriaty.utils.log import lprint, gprint, rprint, colored, cprint, Tprint
 from DrMoriaty.datas.data import Cache, Info
 from DrMoriaty.utils.setting import DB_FOFA
 
@@ -73,6 +73,7 @@ class TestBase:
                 rprint(e)
 
         test_if_same = set()
+        result_zusammen = dict()
         hs = []
         for i in cls.ins:
             if (i.target.ip + i.target.ports) in test_if_same: continue
@@ -108,6 +109,7 @@ class TestBase:
                     def callback_out(future, url=''):
                         try:
                             r = future.result(timeout=timeout)
+                            result_zusammen[url] = r
                             callback(r)
                         except futures.TimeoutError:
                             rprint('timeout:', url)
@@ -115,6 +117,9 @@ class TestBase:
                     for h in hs:
                         future = exe.submit(try_run, h)
                         future.add_done_callback(partial(callback_out, url=h.ip))
+
+                if 'has' in Obj.__name__ or 'if' in Obj.__name__:
+                    Tprint(result_zusammen,color='green',attrs=['bold'])
         else:
             res = try_run(hs)
             if res:

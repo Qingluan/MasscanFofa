@@ -14,7 +14,7 @@ def test_single(url, ssl=False):
     else:
         u = 'http://' + url
     try:
-        res = requests.get(u)
+        res = requests.get(u, timeout=12)
         if res.status_code == 200:
             t = BS(res.text, 'html.parser')("form")
             if t:
@@ -25,12 +25,20 @@ def test_single(url, ssl=False):
                             tdict = tag2dict(single_input.decode())
                             Tprint(tdict, color='blue')
                             print()
+                        return True
+                    return False
     except Exception as e:
         print(colored("[%s] "%url, "yellow"), colored(e, 'red'))
+        return False
 
 def test(target):
     hosts = []   
     for ii in target.ports.split("/"):
+        if not re.match(r'\d+', ii): continue 
         hosts.append(target.ip + ":" + ii)
+    res = {}
     for url in hosts:
-        test_single(url)
+        port = url.split(":")[1]
+        r = test_single(url)
+        res[port] = r
+    return res

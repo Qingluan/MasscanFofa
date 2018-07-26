@@ -81,6 +81,6 @@ def tag2dict(res):
     return ss
     
 def Tprint(d, fmt="", **kargs):
-    s = [[i[0], tabulate(i[1], tablefmt=fmt)] if isinstance(i[1], dict) else i for i in d.items()]
+    s = [[i[0], tabulate(i[1].items(), tablefmt=fmt)] if isinstance(i[1], dict) else i for i in d.items()]
     r = tabulate(s, tablefmt=fmt)
     cprint(r, **kargs)

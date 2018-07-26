@@ -20,6 +20,6 @@ def test(targets):
         else:
             print(colored("[+]", "green"), "http://" + i[0], " alive")
 
-    for i in host:
-        if i not in res:
-            print(colored("[-]", "red"), i, " dead")
+    unres = set(hosts) - set([i[0] for i in res])
+    for i in unres:
+        print(colored("[-]", "red"), i, " dead")

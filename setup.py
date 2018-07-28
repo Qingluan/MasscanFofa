@@ -43,7 +43,7 @@ setup(name='x-mroy-1051',
     include_package_data=True,
     zip_safe=False,
     packages=find_packages(),
-    install_requires=['mroylib-min','tabulate','FLowWork','termcolor'],
+    install_requires=['requestium','mroylib-min','tabulate','FLowWork','termcolor'],
     entry_points={
         'console_scripts': ['x-sehen=DrMoriaty.cmd.main:main',]
     },

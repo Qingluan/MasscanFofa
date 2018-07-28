@@ -34,7 +34,7 @@ class MyInstall(install):
 
 
 setup(name='x-mroy-1051',
-    version='0.1.2',
+    version='0.2.0',
     description='search in web',
     url='https://github.com//.git',
     author='mroy_qing',
@@ -43,7 +43,7 @@ setup(name='x-mroy-1051',
     include_package_data=True,
     zip_safe=False,
     packages=find_packages(),
-    install_requires=['requestium','mroylib-min','tabulate','FLowWork','termcolor'],
+    install_requires=['mroylib-min','pandas','tabulate','FLowWork','requestium','termcolor'],
     entry_points={
         'console_scripts': ['x-sehen=DrMoriaty.cmd.main:main',]
     },

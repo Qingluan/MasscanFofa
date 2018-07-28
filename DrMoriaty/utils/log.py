@@ -1,5 +1,6 @@
 from termcolor import cprint, colored
 from tabulate import tabulate
+from pandas import DataFrame
 import re
 
 
@@ -24,6 +25,28 @@ def tprint(*args, **kargs):
     l = args[1:]
     C = lambda x,y : colored(' ' + x+ ' ', on_color='on_'+ y) if x.strip() else ''
     print(C(f, 'blue'), *l)
+
+
+def SwordPrint(res, err=None, pwd='', dir=[], sub_dir=[], op="",select=None, if_dir=None):
+    pwd = colored(pwd, 'blue', attrs=['bold', 'underline'])
+    if select and select in dir:
+        dir[dir.index(select)] = colored(select, "green", attrs=['underline'])
+    if if_dir:
+        for i in range(len(dir)):
+            if if_dir(dir[i]):
+                dir[i] = colored(dir[i], attrs=['bold'])
+
+    dir = [select] + dir
+    sub_dir = [err] + sub_dir 
+    if err:
+        res = colored(str(err), 'red')
+
+    cmd_reslines = []
+    if  res and isinstance(res, str):
+        cmd_reslines = res.split("\n")
+    t = DataFrame([[pwd] + cmd_reslines, dir, sub_dir, [op]]).T.values
+    print(tabulate(t, headers='firstrow'))
+
 
 
 def tableprint(data, color=None,**kargs):

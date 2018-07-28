@@ -11,6 +11,8 @@ from DrMoriaty.searcher.fofa_search import Fofa
 from DrMoriaty.searcher.github_search import Github
 from DrMoriaty.masscan.masscan import Masscan, MasscanDaemon
 
+from DrMoriaty.dolch.dolch import Dolch
+
 proxy= False
 
 def github_search_do(args):
@@ -66,13 +68,17 @@ def main():
     parser.add_argument('--use', default="db", help="can use fofa | masscan | db ")
     parser.add_argument('-l', '--list', action='store_true', default=False, help='list local db.')
 
-    parser.add_argument('-p', '--page', type=int, default=4, help='set page to search in web')
+    parser.add_argument('--page', type=int, default=4, help='set page to search in web')
     parser.add_argument('-P', '--proxy', default=None, help='set proxy; socks5://127.0.0.1:1080')
     parser.add_argument('-t', '--test', nargs='*', help='use test module to test result')
     parser.add_argument('--login', action='store_true', default=False, help='login in fofa')
     
     parser.add_argument('--ls-mod', action='store_true', default=False, help='list module to use:')
     parser.add_argument('--masServer', action='store_true', default=False, help='list module to use:')
+
+    parser.add_argument('--passwd', default=None, help='set backdoor"s password ')
+    parser.add_argument('--target', default=None, help='set backdoor"s url :like http://localhost:9090/1.jsp ')
+
     
     args = parser.parse_args()
     prepare_test_info = []
@@ -107,6 +113,12 @@ def main():
             prepare_test_info = db_do(args)
         elif args.use == 'github':
             github_search_do(args)
+
+
+    if args.use == 'dolch':
+        Dolch().cmdloop()
+        sys.exit(0)
+
 
     if args.ls_mod:
         ls_mod()

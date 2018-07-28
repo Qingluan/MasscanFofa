@@ -1,15 +1,30 @@
+
 import sys
 import termios
 import contextlib
 import os
+from cmd import Cmd
+import types
 
+from DrMoriaty.utils.log import rprint, gprint
+
+NEW_ATTRS = None
+OLD_ATTRS = None
+STDIN_FILE = None
 
 @contextlib.contextmanager
 def on_keyboard_ready():
+    global NEW_ATTRS
+    global OLD_ATTRS
+    global STDIN_FILE
+
     file = sys.stdin
     old_attrs = termios.tcgetattr(file.fileno())
     new_attrs = old_attrs[:]
     new_attrs[3] = new_attrs[3] & ~(termios.ECHO | termios.ICANON)
+    NEW_ATTRS = new_attrs
+    OLD_ATTRS = old_attrs
+    STDIN_FILE = file
     try:
         termios.tcsetattr(file.fileno(), termios.TCSADRAIN, new_attrs)
         yield
@@ -17,20 +32,25 @@ def on_keyboard_ready():
         termios.tcsetattr(file.fileno(), termios.TCSADRAIN, old_attrs)
 
 
-
 class Panel:
     DIR_MODE = 1
     CMD_MODE = 2
+    FILE_MODE = 3
     SEARCH_MODE = 4
+    SIZE = tuple([ int(i) for i in os.popen("tput lines && tput cols ").read().split()])
 
     def __init__(self):
         self.key_map = {}
         self.key_map_move = {}
         self.key_map_after = {}
         self.key_map_before = {}
-
+        self.prompt = ">"
+        self.DIS_MODE = self.DIR_MODE
         self.now = [0,0]
         [self.set_on_keyboard_listener(i, Panel.DIR_MODE, self.on_move) for i in 'hjkl' ]
+        self.set_on_keyboard_listener('c', Panel.CMD_MODE, self.on_cmd)
+        self.set_on_keyboard_listener('s', Panel.CMD_MODE, self.on_preview)
+        # self.set_on_keyboard_listener('q', Panel.FILE_MODE, self.exit_preview)
 
 
     
@@ -41,8 +61,15 @@ class Panel:
 
     def init(self):
         return
-
     
+    def flush(self):
+        s = " " * (self.SIZE[1] -1)
+        q = '\n'.join([s for i in range(self.SIZE[0] -1 )])
+        os.system("tput cup 0 0")
+        print(q)
+        os.system("tput cup 0 0")
+
+
     def to_right(self):
         self.now[1] += 1
         return self.now
@@ -58,6 +85,11 @@ class Panel:
             self.now[0] -= 1
         return self.now
        
+    def stdin_normal(self):
+        termios.tcsetattr(STDIN_FILE.fileno(), termios.TCSADRAIN, OLD_ATTRS)
+
+    def stdin_listenmode(self):
+        termios.tcsetattr(STDIN_FILE.fileno(), termios.TCSADRAIN, NEW_ATTRS)        
  
     def on_move(self, pane, ch):
         if ch == "j":
@@ -73,6 +105,25 @@ class Panel:
             di = 'right'
             no =  self.to_left()
         self.move(di)
+
+    def on_cmd(self, pane, ch):
+        self.flush()
+        self.stdin_normal()
+        self.do_cmd()
+        self.show()
+        self.stdin_listenmode()
+
+    def on_preview(self, panel, ch):
+        self.flush()
+        self.stdin_normal()
+        self.preview()
+        self.show()
+        self.stdin_listenmode()
+
+    def exit_preview(self, panel, ch):
+        self.flush()
+        self.show()
+        self.DIS_MODE = self.DIR_MODE
 
     def move(self, di):
         raise NotImplementedError
@@ -120,27 +171,30 @@ class Panel:
         events = self.key_map_before.get(k)
         return self._call(events, k)
 
-
+    def do_exit(self, q):
+        return True
         
 
     def move_call(self, k):   
         """
         special happend to 'hjkl' to handle move cursor.
         """
-        events = self.key_map_move.get(k)
-        return self._call(events, k)
+        if self.DIS_MODE == self.DIR_MODE:
+            events = self.key_map_move.get(k)
+            return self._call(events, k)
 
     def run(self):
-        os.system('tput cl  ')
+        self.flush()
         self.init()
+        os.system("tput sc")
         with on_keyboard_ready():
 
             try:
                 cc = 1
                 while 1:
-                    os.system("tput cup 0 0  ")
+                    
                     ch = sys.stdin.read(1)
-                    os.system("tput cl")
+                    self.flush()
                     # self.clear()
                     if not ch or ch == chr(4):
                         break
@@ -157,3 +211,4 @@ class Panel:
 
             except (KeyboardInterrupt, EOFError):
                 pass
+        os.system("tput rc")

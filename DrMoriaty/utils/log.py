@@ -35,12 +35,16 @@ def SwordPrint(res, err=None, pwd='', dir=[], sub_dir=[], op="",select=None, if_
         for i in range(len(dir)):
             if if_dir(dir[i]):
                 dir[i] = colored(dir[i], attrs=['bold'])
-                
+
     dir = [select] + dir
     sub_dir = [err] + sub_dir 
     if err:
         res = colored(str(err), 'red')
-    t = DataFrame([[pwd],res.split("\n"), dir, sub_dir, [op]]).T.values
+
+    cmd_reslines = []
+    if  res and isinstance(res, str):
+        cmd_reslines = res.split("\n")
+    t = DataFrame([[pwd] + cmd_reslines, dir, sub_dir, [op]]).T.values
     print(tabulate(t, headers='firstrow'))
 
 

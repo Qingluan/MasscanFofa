@@ -12,6 +12,7 @@ from DrMoriaty.searcher.github_search import Github
 from DrMoriaty.masscan.masscan import Masscan, MasscanDaemon
 
 from DrMoriaty.moriaty.jsp import main as jsp_do
+from DrMoriaty.moriaty.php import main as php_do
 
 proxy= False
 
@@ -116,9 +117,12 @@ def main():
 
     
     if args.use == 'jsp':
-        gprint("use jsp backdoor")
         jsp_do(args)
         sys.exit(0)
+    elif args.use == 'php':
+        php_do(args)
+        sys.exit(0)
+
 
     if args.ls_mod:
         ls_mod()

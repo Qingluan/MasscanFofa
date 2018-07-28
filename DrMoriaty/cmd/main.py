@@ -11,8 +11,7 @@ from DrMoriaty.searcher.fofa_search import Fofa
 from DrMoriaty.searcher.github_search import Github
 from DrMoriaty.masscan.masscan import Masscan, MasscanDaemon
 
-from DrMoriaty.moriaty.jsp import main as jsp_do
-from DrMoriaty.moriaty.php import main as php_do
+from DrMoriaty.moriaty.dolch import Dolch
 
 proxy= False
 
@@ -115,12 +114,9 @@ def main():
         elif args.use == 'github':
             github_search_do(args)
 
-    
-    if args.use == 'jsp':
-        jsp_do(args)
-        sys.exit(0)
-    elif args.use == 'php':
-        php_do(args)
+
+    if args.use == 'dolch':
+        Dolch().cmdloop()
         sys.exit(0)
 
 

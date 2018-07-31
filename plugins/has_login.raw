@@ -2,6 +2,7 @@ from DrMoriaty.utils.log import lprint, gprint, rprint, colored, tprint, Tprint,
 from bs4 import BeautifulSoup as BS
 import requests
 import re
+
 mode = "thread"
 thread = 20
 
@@ -32,13 +33,5 @@ def test_single(url, ssl=False):
         return False
 
 def test(target):
-    hosts = []   
-    for ii in target.ports.split("/"):
-        if not re.match(r'\d+', ii): continue 
-        hosts.append(target.ip + ":" + ii)
-    res = {}
-    for url in hosts:
-        port = url.split(":")[1]
-        r = test_single(url)
-        res[port] = r
-    return res
+    url = target.ip + ":" + target.port
+    return target.port + " " + str(test_single(url))

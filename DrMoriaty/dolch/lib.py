@@ -48,8 +48,6 @@ class Panel:
         self.DIS_MODE = self.DIR_MODE
         self.now = [0,0]
         [self.set_on_keyboard_listener(i, Panel.DIR_MODE, self.on_move) for i in 'hjkl' ]
-        self.set_on_keyboard_listener('c', Panel.CMD_MODE, self.on_cmd)
-        self.set_on_keyboard_listener('s', Panel.CMD_MODE, self.on_preview)
         # self.set_on_keyboard_listener('q', Panel.FILE_MODE, self.exit_preview)
 
 
@@ -197,6 +195,9 @@ class Panel:
                     self.flush()
                     # self.clear()
                     if not ch or ch == chr(4):
+                        break
+
+                    if ch == 'q':
                         break
                     # if self.mode & Pane.DIR_MODE:
                     

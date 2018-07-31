@@ -11,9 +11,16 @@ from DrMoriaty.searcher.fofa_search import Fofa
 from DrMoriaty.searcher.github_search import Github
 from DrMoriaty.masscan.masscan import Masscan, MasscanDaemon
 
+
 from DrMoriaty.dolch.dolch import Dolch
+from DrMoriaty.nico.libs import BPServer, Bp
+
 
 proxy= False
+
+def bp_do():
+    b = Bp()
+    b.cmdloop()
 
 def github_search_do(args):
     gprint("use github waek search")
@@ -74,7 +81,7 @@ def main():
     parser.add_argument('--login', action='store_true', default=False, help='login in fofa')
     
     parser.add_argument('--ls-mod', action='store_true', default=False, help='list module to use:')
-    parser.add_argument('--masServer', action='store_true', default=False, help='list module to use:')
+    parser.add_argument('--start-server', default=None, help='start server : masscan, bp')
 
     parser.add_argument('--passwd', default=None, help='set backdoor"s password ')
     parser.add_argument('--target', default=None, help='set backdoor"s url :like http://localhost:9090/1.jsp ')
@@ -94,10 +101,13 @@ def main():
     else:
         proxy = False
     
-    if args.masServer:
+    if args.start_server == 'masscan':
         ma = MasscanDaemon("/tmp/MasscanDaemon.pid")
         gprint("-- Start Masscan Report Service --")
         ma.start()
+    elif args.start_server == 'bp':
+        bp = BPServer("/tmp/bpserver.pid")
+        bp.start()
 
     if args.list:
         prepare_test_info = search_in_db()
@@ -115,10 +125,13 @@ def main():
             github_search_do(args)
 
 
+
     if args.use == 'dolch':
         Dolch().cmdloop()
         sys.exit(0)
-
+    elif args.use == 'bp':
+        bp_do()
+        sys.exit(0)
 
     if args.ls_mod:
         ls_mod()

@@ -7,10 +7,7 @@ def usage():
 
 
 def test(targets):
-    hosts = []
-    for i in targets:
-        for ii in i.ports.split("/"):
-            hosts.append(i.ip + ":" + ii)
+    hosts = [i.ip + ":" + i.port for i in targets]
     hosts = list(set(hosts))
     res = TcpTests(hosts)
     unalive = set(hosts) - set(res) 

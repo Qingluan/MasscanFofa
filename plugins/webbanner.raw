@@ -8,11 +8,12 @@ thread = 20
 def usage():
     gprint("get http banner's title")
 
-def test_single(url, ssl=False):
-    if ssl:
-        u = 'https://' + url
+def test(target):
+    url = target.ip + ":" + target.port
+    if target.port == 443:
+        u = 'https://' + target.ip
     else:
-        u = 'http://' + url
+        u = 'http://' + target.ip + ":" + target.port
     try:
         res = requests.get(u, timeout=10)
         if res.status_code == 200:
@@ -22,10 +23,3 @@ def test_single(url, ssl=False):
             gprint(u, t)
     except Exception as e:
         rprint(url, colored(e, 'red'))
-
-def test(targets):
-    hosts = []
-    for ii in targets.ports.split("/"):
-        hosts.append(targets.ip + ":" + ii)
-    for url in hosts:
-        test_single(url)

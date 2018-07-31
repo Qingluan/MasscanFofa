@@ -9,6 +9,9 @@ class Sender(Panel):
 
     def __init__(self, target, key, prefix="->|", tail="|<-", headers=None, proxy=None, encoding='UTF-8'):
         super().__init__()
+        self.set_on_keyboard_listener('c', Panel.CMD_MODE, self.on_cmd)
+        self.set_on_keyboard_listener('s', Panel.CMD_MODE, self.on_preview)
+        
         self.target = target
         self.key = key
         self.prefix = prefix

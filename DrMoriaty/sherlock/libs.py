@@ -6,7 +6,7 @@ from functools import partial
 from concurrent import futures
 from concurrent.futures.thread import ThreadPoolExecutor
 from .test import load,ls_mod
-
+from traceback import print_exception
 
 C = lambda x,y : colored(' ' + x+ ' ', on_color='on_'+ y) if x.strip() else ''
 
@@ -71,12 +71,17 @@ class TestBase:
                 return Obj.test(*args, **kargs)
             except Exception as e:
                 rprint(e)
+                print_exception(e)
 
         test_if_same = set()
         result_zusammen = dict()
         hs = []
         for i in cls.ins:
             if (i.target.ip + i.target.ports) in test_if_same: continue
+            if '/' in i.target.ports:
+                i.target.port = i.target.ports.split("/")[0].strip()
+            else:
+                i.target.port = i.target.ports.strip()
             test_if_same.add(i.target.ip + i.target.ports)
             hs.append(i.target)
         #hs = [i.target for i in cls.ins]

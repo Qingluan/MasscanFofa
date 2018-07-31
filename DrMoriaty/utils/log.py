@@ -47,7 +47,12 @@ def SwordPrint(res, err=None, pwd='', dir=[], sub_dir=[], op="",select=None, if_
     t = DataFrame([[pwd] + cmd_reslines, dir, sub_dir, [op]]).T.values
     print(tabulate(t, headers='firstrow'))
 
-
+def TablePrint(*lists, select=None):
+    first = [i for i in lists[0]]
+    if select and select in first:
+        first[first.index(select)] = colored(select, 'green', attrs=['underline'])
+    t = DataFrame([first, *lists[1:]]).T.values
+    print(tabulate(t))
 
 def tableprint(data, color=None,**kargs):
     res = data.items()
@@ -74,7 +79,9 @@ def lprint(title='', host="" ,ports='', ip='', time='', geo='', os='', body=''):
         else:
             cprint(body, 'green')
 
-
+def print_info(i):
+    lprint(title=i.title, os=i.os, ip=i.ip, ports=i.ports, time=i.ctime, geo=i.geo, body=i.body)
+                
 # def tablize(d, fmt=""):
 #     items = d.items()
 #     can_table = True

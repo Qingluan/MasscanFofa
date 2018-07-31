@@ -105,6 +105,7 @@ class Daemon:
         # Start the daemon
         self.daemonize()
         self.run()
+        return pid
 
     def stop(self):
         """Stop the daemon."""

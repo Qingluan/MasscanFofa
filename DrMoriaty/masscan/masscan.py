@@ -3,7 +3,7 @@ import random
 import time
 
 from DrMoriaty.datas.data import Info
-from DrMoriaty.utils.setting import ReportPATH, DB_FOFA, TmpReportPATH
+from DrMoriaty.setting import ReportPATH, DB_FOFA, TmpReportPATH
 from DrMoriaty.utils.daemon import Daemon
 from DrMoriaty.datas.data import Cache
 from DrMoriaty.utils.log import gprint

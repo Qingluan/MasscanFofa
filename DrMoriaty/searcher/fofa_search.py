@@ -11,7 +11,7 @@ from selenium.webdriver.support import expected_conditions as EC
 
 from DrMoriaty.datas.data import Info
 from DrMoriaty.utils.log import lprint, rprint, gprint
-from DrMoriaty.utils.setting import DB_FOFA, LOGIN_INFO_SESSION, LOGIN_INFO
+from DrMoriaty.setting import DB_FOFA, LOGIN_INFO_SESSION, LOGIN_INFO
 
 import getpass
 import argparse
@@ -198,7 +198,9 @@ class Fofa:
 
         iis = []
         for i in infos:
-            if not self.DB_Handle.query_one(Info, ip=ip,ports=ports, ctime=time):
+            # gprint(i.ip)
+            if not self.DB_Handle.query_one(Info,m='and', ip=ip,ports=ports, ctime=time):
                iis.append(i)
+        gprint("-- save %d --" % len(iis))
         self.DB_Handle.save_all(*iis) 
         return infos

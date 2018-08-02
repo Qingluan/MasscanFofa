@@ -14,15 +14,15 @@ optional arguments:
   -h, --help            show this help message and exit
   -s [SEARCH [SEARCH ...]], --search [SEARCH [SEARCH ...]]
                         search key : -s
-  --use USE             can use fofa | masscan | db
+  --use USE             can use fofa | masscan | db | bp
   -l, --list            list local db.
   -p PAGE, --page PAGE  set page to search in web
   -P, --proxy           set proxy
   -t [TEST [TEST ...]], --test [TEST [TEST ...]]
-                        use test module to test result
+                        use test module to test result | default: alive has_login 
   --login               login in fofa
   --ls-mod              list module to use:
-  --masServer           list module to use:
+  --start-server        start server : masscan | bp
 
 ```
 

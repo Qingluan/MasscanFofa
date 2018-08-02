@@ -20,6 +20,7 @@ proxy= False
 
 def bp_do():
     b = Bp()
+    b.do_start_server("")
     b.cmdloop()
 
 def github_search_do(args):

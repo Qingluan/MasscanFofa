@@ -1,6 +1,6 @@
 from DrMoriaty.utils.log import lprint, gprint, rprint, colored, cprint, Tprint
 from DrMoriaty.datas.data import Cache, Info
-from DrMoriaty.utils.setting import DB_FOFA
+from DrMoriaty.setting import DB_FOFA
 
 from functools import partial
 from concurrent import futures

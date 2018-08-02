@@ -23,8 +23,8 @@ from cmd import Cmd
 # from HTMLParser import HTMLParser
 from html.parser import HTMLParser
 
-from DrMoriaty.utils.setting import BP_SESSION_DIR
-from DrMoriaty.utils.setting import BP_PROXY_PORT
+from DrMoriaty.setting import BP_SESSION_DIR
+from DrMoriaty.setting import BP_PROXY_PORT
 from DrMoriaty.utils.log import gprint
 from DrMoriaty.datas.data import BPData
 import brotli

@@ -10,6 +10,9 @@ def gprint(args, *others, **kargs):
     else:
         print(colored('[+] ', 'green'), args, *others)
 
+def L(*args, **kargs):
+    print(colored("[+]", 'green'), *args, **kargs)
+
 def rprint(args, *others, **kargs):
     
     if isinstance(args, Exception):
@@ -47,12 +50,18 @@ def SwordPrint(res, err=None, pwd='', dir=[], sub_dir=[], op="",select=None, if_
     t = DataFrame([[pwd] + cmd_reslines, dir, sub_dir, [op]]).T.values
     print(tabulate(t, headers='firstrow'))
 
-def TablePrint(*lists, select=None):
+def TablePrint(*lists, select_num=0):
     first = [i for i in lists[0]]
-    if select and select in first:
-        first[first.index(select)] = colored(select, 'green', attrs=['underline'])
+
+    if select_num < len(first) -1:
+        # if len(first[0]) < 10:
+        select_num += 1
+    else:
+        select_num = len(first) -1
+    first[select_num] = colored(first[select_num], 'green', attrs=['underline'])
+
     t = DataFrame([first, *lists[1:]]).T.values
-    print(tabulate(t))
+    print(tabulate(t, headers='firstrow'))
 
 def tableprint(data, color=None,**kargs):
     res = data.items()

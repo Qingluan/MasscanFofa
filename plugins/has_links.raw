@@ -1,0 +1,82 @@
+import requests
+import argparse
+from qlib.net import to
+from bs4 import BeautifulSoup as BS
+from termcolor import colored
+
+
+mode = 'thread'
+thread = 20
+
+
+def tprint(*args, **kargs):
+    print(colored(" --- ", 'green', attrs=['bold']), *args, **kargs)
+
+
+def gprint(*args, **kargs):
+    print(colored("[+]", 'green'), *args, **kargs)
+
+
+def get_links(url):
+    if 'https' in url:
+        try:
+            res = requests.get(url, verify=False, timeout=12)
+        except Exception as e:
+            gprint(colored(str(e), 'red'))
+            return []
+    else:
+        try:
+            res = requests.get(url, verify=False, timeout=12)
+        except Exception as e:
+            gprint(colored(str(e), 'red'))
+            return   []
+    r = BS(res.text, 'lxml')
+    links = [i.attrs['href'] for i in r.select("a") if 'href' in i.attrs]
+    get_form(r)
+    link_types = set()
+    return_links = []
+    tprint(colored('Links','yellow', attrs=['bold']))
+    for i in [i for i in links if not 'javascript:' in i or not i == '#']:
+        if  'javascript:' in i: continue
+        keys = ""
+        rr = i.split("&")
+        for ii in rr:
+            for index,r in enumerate(ii.split("=")):
+                if index % 2 == 0:
+                    keys += r
+        if keys not in link_types:
+            gprint(colored(i, 'blue'))
+            link_types.add(keys)
+            return_links.append(i)
+    return return_links
+
+def get_form(res):
+    for i in res.select("form "):
+        if 'action' in i.attrs:
+            tprint(i.attrs['action'])
+            ins = i.select("input")
+            for i in ins:
+                if 'name' in i.attrs:
+                    gprint(i.attrs['name'])
+
+
+def test(target):
+
+    url = target.ip + ":"+ target.port
+    if target.port == 443:
+        url = 'https://' + url
+    else:
+        url = 'http://' + url
+    return '\n'.join(get_links(url))
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("link", help="link to test")
+
+    args = parser.parse_args()
+    if args.link:
+        get_links(args.link)
+        
+if __name__ == '__main__':
+
+    main()

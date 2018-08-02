@@ -6,7 +6,7 @@ from bs4 import BeautifulSoup
 import pickle, json
 from qlib.net import to
 from DrMoriaty.utils.log import Tprint,gprint,rprint, colored
-from DrMoriaty.utils.setting import GITHUB_LOGIN, GITHUB_SESSION
+from DrMoriaty.setting import GITHUB_LOGIN, GITHUB_SESSION
 from concurrent.futures.thread import ThreadPoolExecutor
 from requestium import Session, Keys
 

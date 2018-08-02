@@ -1,6 +1,6 @@
 from qlib.data import dbobj, Cache
 from qlib.data import GotRedis
-from DrMoriaty.utils.setting import DB_FOFA
+from DrMoriaty.setting import DB_FOFA
 import contextlib
 from base64 import b64decode, b64encode
 import json
@@ -48,18 +48,28 @@ class BPData:
 
     @staticmethod
     def save_req_res(req, req_body, res, res_body):
-        req_data = "%s %s %s\n%s" % (req.command, req.path, req.request_version, req.headers)
+        req_data = "%s %s %s\r\n%s" % (req.command, req.path, req.request_version, req.headers)
         if req_body:
-            req_data += "\n\r\n\r%s" % req_body
+            req_data += "\r\n\r\n%s" % req_body.decode()
             #     req_header_text = "%s %s %s\n%s" % (req.command, req.path, req.request_version, req.headers)
-        res_data = "%s %d %s\n%s" % (res.response_version, res.status, res.reason, res.headers)
+        res_data = "%s %d %s\r\n%s" % (res.response_version, res.status, res.reason, res.headers)
         if res_body:
-            res_data += "\n\r\n\r%s" % res_body
+            content_type = res.headers.get('Content-Type', '')
+            encoding = content_type.split("charset=")
+            if len(encoding) ==2:
+                encoding = encoding[1]
+            else:
+                encoding = 'utf-8'
+            res_data += "\r\n\r\n%s" % res_body.decode(encoding, 'ignore')
         print(req_data)
         redis = GotRedis()
         l = len(redis.redis.hkeys('req'))
         redis.redis.hset('req', l, req_data)
         redis.redis.hset('res', l, res_data)
+
+    @staticmethod
+    def get_data(num):
+        return GotRedis().redis.hget('req', num)
 
     @staticmethod
     def add_target(host):
@@ -89,14 +99,14 @@ class BPData:
     @staticmethod
     def get_all_req():
         redis = GotRedis()
-        return [i for i in redis.redis.hvals("req")]
+        return [i[1] for i in sorted(redis.redis.hgetall("req").items(), key=lambda x: int(x[0]))]
 
 
 
     @staticmethod
     def get_all_res():
         redis = GotRedis()
-        return [i for i in redis.redis.hvals("res")]
+        return [i[1] for i in sorted(redis.redis.hgetall("res").items(), key=lambda x: int(x[0]))]
     # def get_req_res()
 
     # def save_res(res, res_body)

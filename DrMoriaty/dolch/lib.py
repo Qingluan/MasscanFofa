@@ -45,6 +45,7 @@ class Panel:
         self.key_map_after = {}
         self.key_map_before = {}
         self.prompt = ">"
+        self._if_exist = False
         self.DIS_MODE = self.DIR_MODE
         self.now = [0,0]
         [self.set_on_keyboard_listener(i, Panel.DIR_MODE, self.on_move) for i in 'hjkl' ]
@@ -61,8 +62,8 @@ class Panel:
         return
     
     def flush(self):
-        s = " " * (self.SIZE[1] -1)
-        q = '\n'.join([s for i in range(self.SIZE[0] -1 )])
+        s = " " * (self.SIZE[1])
+        q = '\n'.join([s for i in range(self.SIZE[0])])
         os.system("tput cup 0 0")
         print(q)
         os.system("tput cup 0 0")
@@ -181,8 +182,11 @@ class Panel:
             events = self.key_map_move.get(k)
             return self._call(events, k)
 
+    def exit(self):
+        self._if_exist = True
+
     def run(self):
-        self.flush()
+        
         self.init()
         os.system("tput sc")
         with on_keyboard_ready():
@@ -190,7 +194,8 @@ class Panel:
             try:
                 cc = 1
                 while 1:
-                    
+                    if self._if_exist:
+                        break
                     ch = sys.stdin.read(1)
                     self.flush()
                     # self.clear()
@@ -198,7 +203,8 @@ class Panel:
                         break
 
                     if ch == 'q':
-                        break
+                        self.exit()
+                        continue
                     # if self.mode & Pane.DIR_MODE:
                     
                     # if self.mode & Pane.DIR_MODE:
